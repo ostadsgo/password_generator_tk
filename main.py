@@ -99,10 +99,12 @@ class MainFrame(ttk.Frame):
             foreground=[("disabled", "black")],
             fieldbackground=[("disabled", "#F2F1EB")],
         )
-        print(password_entry.state())
-        print("Style password_entry", password_entry["style"])
-        print("Style layout for entry", self.style.layout("TEntry"))
-        print("Style options for entry", self.style.element_options("TEntry.field"))
+        # print(progressbar.winfo_class())
+        # print(password_entry.state())
+        # print("Style password_entry", password_entry["style"])
+        # print("Style layout for entry", self.style.layout("TEntry"))
+        # print("Style layout for entry", self.style.layout("Horizontal.TProgressbar"))
+        # print("Style options for entry", self.style.element_options("TEntry.field"))
 
         ## binds
         self.bind("<Return>", self.generate_password)
@@ -161,12 +163,16 @@ class MainFrame(ttk.Frame):
         password_status = self.get_password_status()
         if password_status == "weak":
             self.strength_number.set(25)
+            self.style.configure("TProgressbar", background="red")
         elif password_status == "normal":
             self.strength_number.set(50)
+            self.style.configure("TProgressbar", background="orange")
         elif password_status == "strong":
             self.strength_number.set(75)
+            self.style.configure("TProgressbar", background="blue")
         elif password_status == "powerful":
             self.strength_number.set(100)
+            self.style.configure("TProgressbar", background="green")
         else:
             self.strength_number.set(0)
 
