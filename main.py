@@ -5,6 +5,7 @@ from tkinter import ttk
 # Exceptions:
 #  - if user add words insted of number in the password_len entry
 #  - if user doens't choose any criteria
+#  - copy button
 
 
 class MainFrame(ttk.Frame):
@@ -31,8 +32,8 @@ class MainFrame(ttk.Frame):
         self.criteria = [self.upper, self.lower, self.number, self.symbol]
         # use join to this or maybe some claver way
         self.allchars = self.uppers + self.lowers + self.numbers + self.symbols
-        self.strength = tk.IntVar(value=0)
-        self.intens = ["weak", "normal", "strong", "powerfull"]
+        self.strength_number = tk.IntVar(value=0)
+        self.strength_status = tk.StringVar(value="weak")
 
         ## Widgets
         password_frame = ttk.Frame(self, padding=(5, 10))
@@ -67,10 +68,13 @@ class MainFrame(ttk.Frame):
         generate_password_button = ttk.Button(
             self, text="Generate Password", command=self.generate_password
         )
-        progressbar = ttk.Progressbar(self, variable=self.strength)
+        progressbar = ttk.Progressbar(self, variable=self.strength_number)
+        strength_label = ttk.Label(
+            self, textvariable=self.strength_status, anchor=tk.CENTER, justify=tk.CENTER
+        )
 
         ## Widgets config
-        password_entry.config( font="iosevka 16 bold", state="disabled")
+        password_entry.config(font="iosevka 16 bold", state="disabled")
         password_len_entry["font"] = "iosevka 16 bold"
 
         ## Pack the widgets
@@ -82,6 +86,7 @@ class MainFrame(ttk.Frame):
         password_len_entry.pack(expand=True, fill=tk.BOTH)
         generate_password_button.pack(expand=True, fill=tk.BOTH)
         progressbar.pack(expand=True, fill=tk.BOTH)
+        strength_label.pack(expand=True, fill=tk.BOTH)
 
         ## style
         self.style.configure("TFrame", background="#B6BBC4")
@@ -142,27 +147,28 @@ class MainFrame(ttk.Frame):
         # TODO: Use enum or dicit
         checked_criteria = sum(item.get() for item in self.criteria)
         if checked_criteria <= 1:
-            return "weak"
+            self.strength_status.set("weak")
         if checked_criteria == 2:
-            return "normal"
+            self.strength_status.set("normal")
         if checked_criteria == 3:
-            return "strong"
+            self.strength_status.set("strong")
         if checked_criteria == 4:
-            return "powerful"
+            self.strength_status.set("powerful")
+        return self.strength_status.get()
 
     def set_progress(self):
         # TODO: Fix if chain enum instead of string or dict.
         password_status = self.get_password_status()
         if password_status == "weak":
-            self.strength.set(25)
+            self.strength_number.set(25)
         elif password_status == "normal":
-            self.strength.set(50)
+            self.strength_number.set(50)
         elif password_status == "strong":
-            self.strength.set(75)
+            self.strength_number.set(75)
         elif password_status == "powerful":
-            self.strength.set(100)
+            self.strength_number.set(100)
         else:
-            self.strength.set(0)
+            self.strength_number.set(0)
 
     def password_strength(self):
         pass
