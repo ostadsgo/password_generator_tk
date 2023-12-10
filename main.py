@@ -2,6 +2,8 @@ from random import choices, shuffle
 import tkinter as tk
 from tkinter import ttk
 
+import pyperclip
+
 # Exceptions:
 #  - if user add words insted of number in the password_len entry
 #  - if user doens't choose any criteria
@@ -111,7 +113,8 @@ class MainFrame(ttk.Frame):
         generate_password_button.bind("<Return>", self.generate_password)
 
     def copy_password(self):
-        print("copy password to clipboard")
+        pyperclip.copy(self.password.get())
+        print("password copied successfuly.")
 
     def checked_number(self):
         """Return number of check boxses checked."""
