@@ -1,18 +1,24 @@
 from random import choices, shuffle
 import tkinter as tk
+import tkinter.messagebox as msgbox
 from tkinter import ttk
+
 
 import pyperclip
 
-# Exceptions:
-#  - if user add words insted of number in the password_len entry
-#  - if user doens't choose any criteria
-#  - copy button
+# TODOS:
+# Decouple logic from ui
+# find a better way to handle -1 case
+# find a way to avoid repetetive dict
+# find a way to get ride of if in gen password
+# better naming stuff
 
 
 class MainFrame(ttk.Frame):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
+
+        ## TODO: get rid of lower case uppercase shit!!
         ## Basic settings
         # give focus to the frame
         self.focus_set()
@@ -32,6 +38,7 @@ class MainFrame(ttk.Frame):
         self.numbers = "".join(chr(i) for i in range(48, 58))
         self.symbols = "@!#$%&^()*+"
         self.criteria = [self.upper, self.lower, self.number, self.symbol]
+        self.intensity = ["weak", "normal", "strong", "powerful"]
         # use join to this or maybe some claver way
         self.allchars = self.uppers + self.lowers + self.numbers + self.symbols
         self.strength_number = tk.IntVar(value=0)
@@ -101,12 +108,6 @@ class MainFrame(ttk.Frame):
             foreground=[("disabled", "black")],
             fieldbackground=[("disabled", "#F2F1EB")],
         )
-        # print(progressbar.winfo_class())
-        # print(password_entry.state())
-        # print("Style password_entry", password_entry["style"])
-        # print("Style layout for entry", self.style.layout("TEntry"))
-        # print("Style layout for entry", self.style.layout("Horizontal.TProgressbar"))
-        # print("Style options for entry", self.style.element_options("TEntry.field"))
 
         ## binds
         self.bind("<Return>", self.generate_password)
@@ -114,25 +115,23 @@ class MainFrame(ttk.Frame):
 
     def copy_password(self):
         pyperclip.copy(self.password.get())
-        print("password copied successfuly.")
 
     def checked_number(self):
-        """Return number of check boxses checked."""
-        # TODO: Can you make this in senior way.
-        n = 0
-        if self.upper.get():
-            n += 1
-        if self.lower.get():
-            n += 1
-        if self.number.get():
-            n += 1
-        if self.symbol.get():
-            n += 1
-        return n
+        """Return the number of check boxses has been checked."""
+        return sum([var.get() for var in self.criteria])
+
+    def any_criteria_checked(self):
+        return any(var.get() for var in self.criteria)
 
     def generate_password(self, enve=None):
+        # if user hasn't checked any checkbox.
+        if self.checked_number() <= 0:
+            msgbox.showinfo("Error", "You sould check at least one criteria.")
+            return
+
         password = []
         n, r = divmod(self.password_len.get(), self.checked_number())
+
         if self.upper.get():
             password.extend("".join(choices(self.uppers, k=n)))
         if self.lower.get():
@@ -148,39 +147,24 @@ class MainFrame(ttk.Frame):
         self.set_progress()
 
     def get_password_status(self):
-        # TODO: Fix this code
-        # TODO: Use enum or dicit
-        checked_criteria = sum(item.get() for item in self.criteria)
-        if checked_criteria <= 1:
-            self.strength_status.set("weak")
-        if checked_criteria == 2:
-            self.strength_status.set("normal")
-        if checked_criteria == 3:
-            self.strength_status.set("strong")
-        if checked_criteria == 4:
-            self.strength_status.set("powerful")
+        checked_number = self.checked_number()
+        print(checked_number, self.intensity[checked_number - 1])
+        self.strength_status.set(self.intensity[checked_number - 1])
         return self.strength_status.get()
 
     def set_progress(self):
-        # TODO: Fix if chain enum instead of string or dict.
         password_status = self.get_password_status()
-        if password_status == "weak":
-            self.strength_number.set(25)
-            self.style.configure("TProgressbar", background="red")
-        elif password_status == "normal":
-            self.strength_number.set(50)
-            self.style.configure("TProgressbar", background="orange")
-        elif password_status == "strong":
-            self.strength_number.set(75)
-            self.style.configure("TProgressbar", background="blue")
-        elif password_status == "powerful":
-            self.strength_number.set(100)
-            self.style.configure("TProgressbar", background="green")
-        else:
-            self.strength_number.set(0)
-
-    def password_strength(self):
-        pass
+        intensity_level = {"weak": 25, "normal": 50, "strong": 75, "powerful": 100}
+        intensity_color = {
+            "weak": "red",
+            "normal": "orange",
+            "strong": "blue",
+            "powerful": "green",
+        }
+        self.strength_number.set(intensity_level.get(password_status, 0))
+        self.style.configure(
+            "TProgressbar", background=intensity_color.get(password_status, "red")
+        )
 
 
 class App(tk.Tk):
